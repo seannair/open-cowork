@@ -14,10 +14,11 @@ import {
   resolveLocalFilePathFromHref,
 } from '../../utils/markdown-local-link';
 import { normalizeLatexDelimiters } from '../../utils/latex-delimiters';
+import { AUTO_TEXT_DIRECTION_PROPS } from '../../utils/text-direction';
 import type { ToolUseContent, ToolResultContent, FileAttachmentContent } from '../../types';
 import { FileText } from 'lucide-react';
 import { CodeBlock } from './CodeBlock';
-import { ThinkingBlock } from './ThinkingBlock';
+import { ThinkingBlock, escapeThinkTags } from './ThinkingBlock';
 import { ToolUseBlock } from './ToolUseBlock';
 import { ToolResultBlock } from './ToolResultBlock';
 import type { ContentBlockViewProps } from './types';
@@ -200,10 +201,18 @@ export const ContentBlockView = memo(function ContentBlockView({
         return <CodeBlock language={match[1]}>{String(children).replace(/\n$/, '')}</CodeBlock>;
       },
       p({ children }: { children?: React.ReactNode }) {
-        return <p className="text-left">{renderChildrenWithFileLinks(children, 'p')}</p>;
+        return (
+          <p {...AUTO_TEXT_DIRECTION_PROPS} className="text-start">
+            {renderChildrenWithFileLinks(children, 'p')}
+          </p>
+        );
       },
       li({ children }: { children?: React.ReactNode }) {
-        return <li className="text-left">{renderChildrenWithFileLinks(children, 'li')}</li>;
+        return (
+          <li {...AUTO_TEXT_DIRECTION_PROPS} className="text-start">
+            {renderChildrenWithFileLinks(children, 'li')}
+          </li>
+        );
       },
       table({ children }: { children?: React.ReactNode }) {
         return (
@@ -266,7 +275,10 @@ export const ContentBlockView = memo(function ContentBlockView({
       // Simple text display for user messages, Markdown for assistant
       if (isUser) {
         return (
-          <p className="text-text-primary whitespace-pre-wrap break-words text-left">
+          <p
+            {...AUTO_TEXT_DIRECTION_PROPS}
+            className="text-text-primary whitespace-pre-wrap break-words text-start"
+          >
             {text}
             {isStreaming && <span className="inline-block w-2 h-4 bg-accent ml-1 animate-pulse" />}
           </p>
@@ -277,20 +289,26 @@ export const ContentBlockView = memo(function ContentBlockView({
         <PanelErrorBoundary
           name="MessageMarkdown"
           fallback={
-            <div className="prose-chat max-w-none text-text-primary whitespace-pre-wrap break-words">
+            <div
+              {...AUTO_TEXT_DIRECTION_PROPS}
+              className="prose-chat max-w-none text-text-primary whitespace-pre-wrap break-words text-start"
+            >
               {normalizedText}
             </div>
           }
         >
           <Suspense
             fallback={
-              <div className="prose-chat max-w-none text-text-primary whitespace-pre-wrap break-words">
+              <div
+                {...AUTO_TEXT_DIRECTION_PROPS}
+                className="prose-chat max-w-none text-text-primary whitespace-pre-wrap break-words text-start"
+              >
                 {normalizedText}
               </div>
             }
           >
             <MessageMarkdown
-              normalizedText={normalizedText}
+              normalizedText={escapeThinkTags(normalizedText)}
               isStreaming={isStreaming}
               components={markdownComponents}
             />
